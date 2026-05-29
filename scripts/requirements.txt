@@ -4,6 +4,7 @@ networkx
 yfinance
 matplotlib
 tqdm
+dwave-neal
 dimod
 dwave-ocean-sdk
 python-dotenv

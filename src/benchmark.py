@@ -2,7 +2,7 @@
 benchmarking community biased asset allocation.
 """
 
-import numpy as np
+from tqdm import tqdm
 
 from modules import *
 from main import community_asset_allocation
@@ -21,8 +21,7 @@ def benchmark_1(assets, number_runs=50, solver_type="HYBRID", number_communities
     caa_rar = [] # community asset allocation risk and returns
     aa_rar = [] # asset allocation risk and returns
 
-    for i in range(number_runs):
-        print(f"Run number: {i}")
+    for _ in tqdm(range(number_runs)):
         caa = community_asset_allocation(daily_returns=daily_returns, number_communities=number_communities, solver_type=solver_type) # community asset allocations
 
         caa_rar.append((getRisk(covariance=cov_matrix, allocations=caa), getReturns(allocations=caa, returns=returns)))
