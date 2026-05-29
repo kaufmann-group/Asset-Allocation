@@ -1,20 +1,20 @@
-AAPL
-MSFT
-GOOGL
-AMZN
-FB
-TSLA
-NVDA
-JPM
-V
-JNJ
-WMT
-PG
-MA
-DIS
-HD
-BAC
-VZ
-ADBE
-CMCSA
-NFLX
+AAPL                                Apple Incorporated
+MSFT                                Microsoft Corporation
+GOOGL                               Alphabet Incorporated
+AMZN                                Amazon.com Incorporated
+META                                Meta Platforms Incorporated
+TSLA                                Tesla IncorporatedSLA
+NVDA                                NVIDIA Corporation
+JPM                                 JPMorgan Chase & Company
+V                                   Visa Incorporated
+JNJ                                 Johnson & Johnson
+WMT                                 Walmart Incorporated
+PG                                  Procter & Gamble Company
+MA                                  Mastercard Incorporated
+DIS                                 The Walt Disney Company
+HD                                  Home Depot Incorporated
+BAC                                 Bank of America Corp
+VZ                                  Verizon Communications
+ADBE                                Adobe Incorporated
+CMCSA                               Comcast Corporation
+NFLX                                Netflix Incorporated

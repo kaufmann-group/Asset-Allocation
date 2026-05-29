@@ -7,3 +7,4 @@ tqdm
 dimod
 dwave-ocean-sdk
 python-dotenv
+urllib3<2

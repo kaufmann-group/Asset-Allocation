@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 
+"""
+draws graph of communities
+"""
 def draw_graph(Graph, name, labels=None):
     pos = nx.spring_layout(Graph, seed=7)
     cmap = colormaps["tab10"]
@@ -18,8 +21,7 @@ def draw_graph(Graph, name, labels=None):
     else:
         norm_weights = np.ones_like(weights) * 0.5
 
-    nx.draw_networkx(Graph, pos=pos, node_color=node_colors, with_labels=True, node_size=500, font_size=9,
-        edge_color=norm_weights, edge_cmap=plt.cm.Greys, width=2)
+    nx.draw_networkx(Graph, pos=pos, node_color=node_colors, with_labels=True, node_size=500, font_size=9, edge_color=norm_weights, edge_cmap=plt.cm.Greys, width=2)
 
     plt.title("Graph")
     plt.axis("off")
