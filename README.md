@@ -24,6 +24,7 @@ Note that the setup file works only for Unix machines, windowsOS users must crea
 
 - Xu, H., Dasgupta, S., Pothen, A., & Banerjee, A. (2023). [Dynamic asset allocation with expected shortfall via quantum annealing](https://arxiv.org/pdf/2112.03188). Entropy, 25(3), 541.
 - Negre, C. F., Ushijima-Mwesigwa, H., & Mniszewski, S. M. (2020). [Detecting multiple communities using quantum annealing on the D-Wave system](https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0227538&type=printable). Plos one, 15(2), e0227538.
+- Cadavid, A. G., Kaushik, A., Chandarana, P., Lopez-Ruiz, M. A., Dev, G., Aboumrad, W., ... & Hegade, N. N. (2026). [Large-scale portfolio optimization on a trapped-ion quantum computer](https://arxiv.org/pdf/2602.23976). arXiv preprint arXiv:2602.23976.
 
 This work was created by the collaborative efforts of Bhavya Lakhina, Esha Sury, Dhruv Upreti and Shashank Boopathi; mentorship was given by Kale Stahl and Birgit Kaufmann. Funding was given through D-wave. 
 
