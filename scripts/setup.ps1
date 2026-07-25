@@ -1,8 +1,10 @@
 # check to see if python is installed! `python --version` if not install as `winget install -e --id Python.Python.3.11`
-# run as `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\setup.ps1`
+# run as `powershell -ExecutionPolicy Bypass -File .\setup.ps1`
 
 $ErrorActionPreference = "Stop"
 
+# Get the project root folder (one level up from this script)
+$REPO = Resolve-Path "$PSScriptRoot\.."
 Set-Location $REPO
 
 python -m venv "$REPO\ocean"
@@ -17,4 +19,4 @@ python -m ipykernel install --user --name=repo-env --display-name "Asset Allocat
 Write-Host ""
 Write-Host "Setup complete."
 Write-Host "Activate the environment from the project root with:"
-Write-Host ".\ocean\Scripts\Activate.ps1"
+Write-Host ".\ocean\Scripts\Activate.bat"
