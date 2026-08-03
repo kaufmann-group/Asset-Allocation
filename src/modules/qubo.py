@@ -20,6 +20,7 @@ token = os.getenv("API_TOKEN")
 
 endpoint = "https://cloud.dwavesys.com/sapi"
 
+
 class Qubo(ABC):
     solvers_available = None
     sampler_cache = {}
@@ -48,10 +49,13 @@ class Qubo(ABC):
         with Client.from_config(token=token) as client:
             solvers = client.get_solvers()
 
-        cls.solvers_available = [(s.name, s.properties.get("category", "unknown").upper()) for s in solvers]
+        cls.solvers_available = [
+            (s.name, s.properties.get("category", "unknown").upper())
+            for s in solvers
+        ]
 
         return cls.solvers_available
-    
+
     @classmethod
     def get_sampler(cls, solver_type):
         solver_type = solver_type.upper()
@@ -67,18 +71,31 @@ class Qubo(ABC):
 
         elif solver_type in {"QPU", "HYBRID"}:
             solvers = cls.get_solvers()
-            solver_name = next((name for name, category in solvers if category == solver_type), None)
+            solver_name = next(
+                (name for name, category in solvers if category == solver_type),
+                None,
+            )
 
             if solver_name is None:
-                raise ValueError(f"No solver found for solver_type='{solver_type}'.")
+                raise ValueError(
+                    f"No solver found for solver_type='{solver_type}'."
+                )
 
             if solver_type == "QPU":
-                sampler = EmbeddingComposite(DWaveSampler(solver=solver_name, token=token, endpoint=endpoint))
+                sampler = EmbeddingComposite(
+                    DWaveSampler(
+                        solver=solver_name, token=token, endpoint=endpoint
+                    )
+                )
             else:
-                sampler = LeapHybridSampler(solver=solver_name, token=token, endpoint=endpoint)
+                sampler = LeapHybridSampler(
+                    solver=solver_name, token=token, endpoint=endpoint
+                )
 
         else:
-            raise ValueError("solver_type must be 'EXACT', 'SIMULATED', 'QPU', or 'HYBRID'.")
+            raise ValueError(
+                "solver_type must be 'EXACT', 'SIMULATED', 'QPU', or 'HYBRID'."
+            )
 
         cls.sampler_cache[solver_type] = sampler
         return sampler
@@ -88,7 +105,9 @@ class Qubo(ABC):
     objective function.
     """
 
-    def solve(self, solver_type, num_reads=3000, **sample_kwargs):
+    def solve(
+        self, solver_type, num_reads=3000, write_report=True, **sample_kwargs
+    ):
         solver_type = solver_type.upper()
         sampler = self.get_sampler(solver_type)
 
@@ -115,16 +134,20 @@ class Qubo(ABC):
             "problem": {
                 "logical_variables": bqm.num_variables,
                 "logical_interactions": bqm.num_interactions,
-                "logical_graph_density": (bqm.num_interactions / possible_edges if possible_edges > 0 else 0.0)
+                "logical_graph_density": (
+                    bqm.num_interactions / possible_edges
+                    if possible_edges > 0
+                    else 0.0
+                ),
             },
             "solver": {
                 "solver_type": solver_type,
-                "num_reads_requested": (num_reads if solver_type in {"SIMULATED", "QPU"} else None),
+                "num_reads_requested": (
+                    num_reads if solver_type in {"SIMULATED", "QPU"} else None
+                ),
                 "sample_kwargs": dict(sample_kwargs),
             },
-            "timing": {
-                "bqm_build_time_seconds": bqm_build_time,
-            },
+            "timing": {"bqm_build_time_seconds": bqm_build_time},
             "embedding": {},
             "solution": {},
         }
@@ -135,18 +158,30 @@ class Qubo(ABC):
             sampleset = sampler.sample(bqm)
 
         elif solver_type == "SIMULATED":
-            sampleset = sampler.sample(bqm, num_reads=num_reads, **sample_kwargs)
+            sampleset = sampler.sample(
+                bqm, num_reads=num_reads, **sample_kwargs
+            )
 
         elif solver_type == "QPU":
-            sampleset = sampler.sample(bqm, num_reads=num_reads, return_embedding=True, chain_break_fraction=True, **sample_kwargs)
+            sampleset = sampler.sample(
+                bqm,
+                num_reads=num_reads,
+                return_embedding=True,
+                chain_break_fraction=True,
+                **sample_kwargs,
+            )
 
         elif solver_type == "HYBRID":
             sampleset = sampler.sample(bqm, **sample_kwargs)
 
         else:
-            raise ValueError("solver_type must be 'EXACT', 'SIMULATED', 'QPU', or 'HYBRID'")
+            raise ValueError(
+                "solver_type must be 'EXACT', 'SIMULATED', 'QPU', or 'HYBRID'"
+            )
 
-        metrics["timing"]["sampling_wall_time_seconds"] = (perf_counter() - sample_start)
+        metrics["timing"]["sampling_wall_time_seconds"] = (
+            perf_counter() - sample_start
+        )
 
         # raw info before aggregation
         raw_info = dict(sampleset.info)
@@ -159,53 +194,96 @@ class Qubo(ABC):
         total_reads = int(occurrences.sum())
         weighted_mean_energy = float(np.average(energies, weights=occurrences))
 
-        metrics["solution"].update({
-            "total_reads_returned": total_reads,
-            "unique_solutions_before_aggregation": len(sampleset),
-            "best_energy": minimum_energy,
-            "mean_energy": weighted_mean_energy,
-            "energy_std": float(np.sqrt(np.average((energies - weighted_mean_energy) ** 2, weights=occurrences))),
-            "worst_energy": float(energies.max()),
-            "best_solution_probability": float(occurrences[best_mask].sum() / total_reads)
-        })
+        metrics["solution"].update(
+            {
+                "total_reads_returned": total_reads,
+                "unique_solutions_before_aggregation": len(sampleset),
+                "best_energy": minimum_energy,
+                "mean_energy": weighted_mean_energy,
+                "energy_std": float(
+                    np.sqrt(
+                        np.average(
+                            (energies - weighted_mean_energy) ** 2,
+                            weights=occurrences,
+                        )
+                    )
+                ),
+                "worst_energy": float(energies.max()),
+                "best_solution_probability": float(
+                    occurrences[best_mask].sum() / total_reads
+                ),
+            }
+        )
 
         metrics["timing"]["solver_reported"] = raw_info.get("timing", {})
 
         if solver_type == "QPU":
             context = raw_info.get("embedding_context", {})
             embedding = context.get("embedding", {})
-            lengths = np.asarray([len(chain) for chain in embedding.values()], dtype=float)
+            lengths = np.asarray(
+                [len(chain) for chain in embedding.values()], dtype=float
+            )
 
-            metrics["embedding"].update({
-                "physical_qubits": len({
-                    qubit
-                    for chain in embedding.values()
-                    for qubit in chain
-                }),
-                "mean_chain_length": (float(lengths.mean()) if lengths.size else None),
-                "std_chain_length": (float(lengths.std()) if lengths.size else None),
-                "min_chain_length": (int(lengths.min()) if lengths.size else None),
-                "max_chain_length": (int(lengths.max()) if lengths.size else None),
-                "chain_strength": context.get("chain_strength"),
-                "embedding_timing": context.get("timing", {})
-            })
+            metrics["embedding"].update(
+                {
+                    "physical_qubits": len(
+                        {
+                            qubit
+                            for chain in embedding.values()
+                            for qubit in chain
+                        }
+                    ),
+                    "mean_chain_length": (
+                        float(lengths.mean()) if lengths.size else None
+                    ),
+                    "std_chain_length": (
+                        float(lengths.std()) if lengths.size else None
+                    ),
+                    "min_chain_length": (
+                        int(lengths.min()) if lengths.size else None
+                    ),
+                    "max_chain_length": (
+                        int(lengths.max()) if lengths.size else None
+                    ),
+                    "chain_strength": context.get("chain_strength"),
+                    "embedding_timing": context.get("timing", {}),
+                }
+            )
 
             if "chain_break_fraction" in sampleset.record.dtype.names:
-                break_fractions = np.asarray(sampleset.record.chain_break_fraction, dtype=float)
+                break_fractions = np.asarray(
+                    sampleset.record.chain_break_fraction, dtype=float
+                )
 
-                metrics["embedding"].update({
-                    "mean_chain_break_fraction": float(np.average(break_fractions, weights=occurrences)),
-                    "max_chain_break_fraction": float(break_fractions.max()),
-                    "samples_with_any_break_fraction": float(occurrences[break_fractions > 0].sum() / total_reads),
-                    "samples_over_10_percent_breaks": float(occurrences[break_fractions > 0.10].sum() / total_reads)
-                })
+                metrics["embedding"].update(
+                    {
+                        "mean_chain_break_fraction": float(
+                            np.average(break_fractions, weights=occurrences)
+                        ),
+                        "max_chain_break_fraction": float(
+                            break_fractions.max()
+                        ),
+                        "samples_with_any_break_fraction": float(
+                            occurrences[break_fractions > 0].sum() / total_reads
+                        ),
+                        "samples_over_10_percent_breaks": float(
+                            occurrences[break_fractions > 0.10].sum()
+                            / total_reads
+                        ),
+                    }
+                )
 
         aggregated = sampleset.aggregate()
         lowest = aggregated.lowest(rtol=0, atol=1e-10).aggregate()
 
-        best = max(lowest.data(["sample", "energy", "num_occurrences"]), key=lambda row: row.num_occurrences)
+        best = max(
+            lowest.data(["sample", "energy", "num_occurrences"]),
+            key=lambda row: row.num_occurrences,
+        )
 
-        x = np.asarray([best.sample[variable] for variable in range(n)], dtype=int)
+        x = np.asarray(
+            [best.sample[variable] for variable in range(n)], dtype=int
+        )
 
         self.solution = x
         self.energy = float(best.energy)
@@ -214,11 +292,15 @@ class Qubo(ABC):
 
         self.save_benchmark_report()
 
+        if write_report:
+            self.save_benchmark_report()
+
         return x
 
     """
     get solution via annealer to qubo
     """
+
     def run(self, solver_type, **sample_kwargs):
         self.Q = self.build_qubo()
         x = self.solve(solver_type=solver_type, **sample_kwargs)
@@ -227,7 +309,11 @@ class Qubo(ABC):
     """
     Save benchmark metrics from the most recent run.
     """
-    def save_benchmark_report(self, filepath=f"{git_root.git_root()}/src/benchmark-reports/benchmark_report.txt"):
+
+    def save_benchmark_report(
+        self,
+        filepath=f"{git_root.git_root()}/src/benchmark-reports/benchmark_report.txt",
+    ):
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
         with open(filepath, "w") as file:

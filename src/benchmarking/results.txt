@@ -1,0 +1,41 @@
+Region: lambda_1 ∈ [5, 12],
+        lambda_2 ∈ [10, 50],
+        lambda_3 ∈ [30, 90],
+        gamma/beta non-critical (gamma = 8, beta = 1 used)
+        
+        candidate point (6.79, 20.5, 29.95) confirmed on 200 fresh runs.
+
+Claim: in this region, the community-based model matches the classical QUBO's risk (Δ ≈ 0.003) and return (Δ ≈ 0.015)
+    at noise level — but via a measurably different portfolio (L1 ≈ 0.38 vs a 0.06 noise floor),
+    reflecting the cross-community covariance the decomposition cannot see.
+
+    For candidate point, community–classical L1 ≈ 0.38 versus a classical self-distance of 0.061.
+    The classical annealer reproduces its own portfolio to within ~3% of total mass across independent runs,
+    so the noise floor is tight — and the community model sits 6× above it.
+    L1 of 0.38 means roughly 19% of the portfolio's mass is allocated to different assets - a systematically different portfolio.
+
+    The community pipeline finds a portfolio that is statistically equivalent to the classical one:
+        same risk to ~0.003, same return to ~0.015 — but it is a different portfolio, redistributing about a fifth of the weight.
+
+Boundaries: closeness degrades sharply for lambda_1 ≳ 20 (return-chasing regimes) and lambda_3 ≲ 25;
+            lambda_2 ≲ 10 additionally causes budget-violation artifacts including whole-community dropout.
+            
+    Note:   Community dropout is when an entire community's inner solve returns all-zero bits and that community is then
+            zeroed out of the portfolio
+
+Merging: ~20% of runs find 4 communities;
+        effect on closeness ~10% per event, ~2% aggregate;
+        insensitive to gamma, so likely genuine 4-community structure in the data.
+
+Tuning Lambdas further: Further tuning at this point would be ranking noise and then zooming into it
+    The only two things that would legitimately reopen the lambda question, for the record:
+        
+        Moving to the actual QPU - Hardware noise, embedding, and chain breaks change the effective solution quality,
+        and QUBO penalty balance interacts with all of that.
+        The region likely transfers roughly, but "roughly" is worth a small (say 32-point) sweep on hardware before certifying
+        it there — not because the current analysis is wrong, but because it was conditioned on neal at 400 reads / 300 sweeps,
+        which is baked into the data.
+
+        Changing the problem - Different asset universe, different number of communities, different bits_per_asset:
+            Any of these shifts the QUBO's scale structure, and lambda_2/lambda_3 balance is scale-dependent.
+            The region is a property of this configuration, not a universal constant.

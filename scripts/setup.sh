@@ -4,13 +4,13 @@ set -e
 REPO=$(git rev-parse --show-toplevel)
 cd "$REPO"
 
-python3 -m venv "$REPO/ocean"
+arch -arm64 python3 -m venv "$REPO/ocean"
 source "$REPO/ocean/bin/activate"
 
-pip install --upgrade pip
-pip install -r "$REPO/scripts/requirements.txt"
+python3 -m pip install --upgrade pip
+python3 -m pip install --no-cache-dir --force-reinstall -r "$REPO/scripts/requirements.txt"
 
-python -m ipykernel install --user --name=repo-env --display-name "Asset Allocation Repository Environment"
+python3 -m ipykernel install --user --name=repo-env --display-name "Asset Allocation Repository Environment"
 
 
 echo ""
