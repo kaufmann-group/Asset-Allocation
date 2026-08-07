@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from time import perf_counter
-
+import dwave.inspector
 import dimod
 import neal
 
@@ -139,6 +139,15 @@ class Qubo(ABC):
 
         elif solver_type == "QPU":
             sampleset = sampler.sample(bqm, num_reads=num_reads, return_embedding=True, chain_break_fraction=True, **sample_kwargs)
+            sampleset = sampler.sample(
+                bqm,
+                num_reads=num_reads,
+                return_embedding=True,
+                chain_break_fraction=True,
+                **sample_kwargs
+            )
+
+            dwave.inspector.show(sampleset)
 
         elif solver_type == "HYBRID":
             sampleset = sampler.sample(bqm, **sample_kwargs)
@@ -222,7 +231,7 @@ class Qubo(ABC):
     def run(self, solver_type, **sample_kwargs):
         self.Q = self.build_qubo()
         x = self.solve(solver_type=solver_type, **sample_kwargs)
-        return self.decode_solution(x)
+        return self.decode_solution(x),self.Q
 
     """
     Save benchmark metrics from the most recent run.
