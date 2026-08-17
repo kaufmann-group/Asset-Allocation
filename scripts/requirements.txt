@@ -13,3 +13,4 @@ git_root
 ipykernel
 jupyter
 notebook
+scipy

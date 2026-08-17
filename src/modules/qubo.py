@@ -212,7 +212,7 @@ class Qubo(ABC):
         self.sampleset = aggregated
         self.benchmark_metrics = metrics
 
-        self.save_benchmark_report()
+        #self.save_benchmark_report()
 
         return x
 

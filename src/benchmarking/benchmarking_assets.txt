@@ -40,7 +40,6 @@ NFLX                                Netflix Incorporated
 T                                   AT&T Incorporated
 TMUS                                T-Mobile US Incorporated
 CHTR                                Charter Communications
-EA                                  Electronic Arts Incorporated
 
 ------------ Financials, Fintech & Payments ------------
 
